@@ -1,18 +1,19 @@
+#include <ncurses.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <unistd.h>
-#include <ncurses.h>
 
 #define WIDTH 80
 #define HEIGHT 25
 
 void LaunchGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]);
-void InitSettings(int canvas_before[HEIGHT][WIDTH]) { srand(time(NULL)); 
-        initscr(); // Initialize ncurses
-    curs_set(0); // Hide the cursor
-    noecho(); // Don't display user input
-    timeout(0); // Non-blocking input
+void InitSettings(int canvas_before[HEIGHT][WIDTH]) {
+    srand(time(NULL));
+    initscr();    // Initialize ncurses
+    curs_set(0);  // Hide the cursor
+    noecho();     // Don't display user input
+    timeout(0);   // Non-blocking input
     keypad(stdscr, TRUE);
 
     for (int i = 0; i < HEIGHT; i++)
@@ -35,12 +36,13 @@ int main() {
     } else {
         for (int i = 0; i < HEIGHT; i++) {
             for (int j = 0; j < WIDTH; j++) {
-                if (scanf("%d", &canvas_before[i][j]) != 1) {
-                    printf("Ошибка при чтении данных из stdin\n");
-                    return 1;
-                }
+                scanf("%d", &canvas_before[i][j]);
             }
         }
+    }
+    
+    if (freopen("/dev/tty", "r", stdin) != NULL) {
+        TRUE;
     }
 
     LaunchGame(canvas_before, canvas);
@@ -88,6 +90,7 @@ void CreateNextStep(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH])
 }
 
 void DrawGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]) {
+    clear();
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
             if (canvas_before[y][x] == 1)
@@ -98,10 +101,6 @@ void DrawGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]) {
         printw("\n");
     }
     refresh();
-
-    usleep(100000);
-    move(0, 0);
-    CreateNextStep(canvas_before, canvas);
 }
 
 void LaunchGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]) {
@@ -109,12 +108,12 @@ void LaunchGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]) {
     while (1) {
         DrawGame(canvas_before, canvas);
         CreateNextStep(canvas_before, canvas);
-
+        napms(200);
         ch = getch(); // Get user input
         if (ch == 'q') // Press 'q' to exit
             break;
-        clear();
+
     }
 
-    endwin(); // Clean up ncurses
+    endwin();  // Clean up ncurses
 }
