@@ -7,15 +7,15 @@
 #define WIDTH 80
 #define HEIGHT 25
 
-void InitSettings(int canvas_before[HEIGHT][WIDTH]);
-void LaunchGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]);
+void InitSettings(int canvas[HEIGHT][WIDTH]);
+void LaunchGame(int canvas[HEIGHT][WIDTH], int canvas_future[HEIGHT][WIDTH]);
 void InitDisplaySpeed(const int *speed, int *displaySpeed);
 void RandomCells(int canvas[HEIGHT][WIDTH]);
-void ReadCanvas(int canvas_before[HEIGHT][WIDTH]);
+void ReadCanvas(int canvas[HEIGHT][WIDTH]);
 int IsWillLiveCeil(int canvas[HEIGHT][WIDTH], int y, int x);
 int GetCountNeighbor(int canvas[HEIGHT][WIDTH], int y, int x);
-void CreateNextStep(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]);
-void DrawGame(int canvas_before[HEIGHT][WIDTH], int *displaySpeed);
+void CreateNextStep(int canvas[HEIGHT][WIDTH], int canvas_future[HEIGHT][WIDTH]);
+void DrawGame(int canvas[HEIGHT][WIDTH], int *displaySpeed);
 void DrawEndGame();
 void EndGame();
 
@@ -180,3 +180,4 @@ void EndGame() {
     DrawEndGame();
     refresh();
 }
+
