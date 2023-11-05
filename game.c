@@ -29,7 +29,7 @@ int main() {
     return 0;
 }
 
-void InitSettings(int canvas_before[HEIGHT][WIDTH]) {
+void InitSettings(int canvas[HEIGHT][WIDTH]) {
     srand(time(NULL));
 
     initscr();
@@ -41,15 +41,15 @@ void InitSettings(int canvas_before[HEIGHT][WIDTH]) {
     attron(COLOR_PAIR(1));
     keypad(stdscr, TRUE);
 
-    ReadCanvas(canvas_before);
+    ReadCanvas(canvas);
 }
 
-void LaunchGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]) {
+void LaunchGame(int canvas[HEIGHT][WIDTH], int canvas_future[HEIGHT][WIDTH]) {
     int speed = 2;
     int displaySpeed = 9;
     while (1) {
-        DrawGame(canvas_before, &displaySpeed);
-        CreateNextStep(canvas_before, canvas);
+        DrawGame(canvas, &displaySpeed);
+        CreateNextStep(canvas, canvas_future);
         napms(70 * speed);
         int ch = getch();
         if (ch == 'q') break;
@@ -87,13 +87,13 @@ void RandomCells(int canvas[HEIGHT][WIDTH]) {
         for (int j = 0; j < WIDTH; j++) canvas[i][j] = rand() % 2;
 }
 
-void ReadCanvas(int canvas_before[HEIGHT][WIDTH]) {
+void ReadCanvas(int canvas[HEIGHT][WIDTH]) {
     if (isatty(fileno(stdin))) {
-        RandomCells(canvas_before);
+        RandomCells(canvas);
     } else {
         for (int i = 0; i < HEIGHT; i++) {
             for (int j = 0; j < WIDTH; j++) {
-                scanf("%d", &canvas_before[i][j]);
+                scanf("%d", &canvas[i][j]);
             }
         }
     }
@@ -134,27 +134,27 @@ int GetCountNeighbor(int canvas[HEIGHT][WIDTH], int y, int x) {
     return count_lives;
 }
 
-void CreateNextStep(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]) {
+void CreateNextStep(int canvas[HEIGHT][WIDTH], int canvas_future[HEIGHT][WIDTH]) {
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
-            canvas[y][x] = canvas_before[y][x];
+            canvas_future[y][x] = canvas[y][x];
         }
     }
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
-            canvas_before[y][x] = IsWillLiveCeil(canvas, y, x);
+            canvas[y][x] = IsWillLiveCeil(canvas_future, y, x);
         }
     }
 }
 
-void DrawGame(int canvas_before[HEIGHT][WIDTH], int *displaySpeed) {
+void DrawGame(int canvas[HEIGHT][WIDTH], int *displaySpeed) {
     clear();
     attroff(COLOR_PAIR(1));
     printw("Speed: %d\n", *displaySpeed);
     attron(COLOR_PAIR(1));
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
-            if (canvas_before[y][x] == 1)
+            if (canvas[y][x] == 1)
                 printw("*");
             else
                 printw(" ");
