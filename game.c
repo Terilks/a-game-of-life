@@ -7,9 +7,10 @@
 
 void LaunchGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]);
 
-int main() {
+int main(int argc, char *argv[]) {
     int canvas_before[HEIGHT][WIDTH];
     int canvas[HEIGHT][WIDTH];
+    
     LaunchGame(canvas_before, canvas);
 
     return 0;
@@ -54,22 +55,6 @@ int IsHaveNeighbor(int canvas[HEIGHT][WIDTH], int y, int x) {
     return flag;
 }
 
-void DrawGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]) {
-    for (int y = 0; y < HEIGHT; y++) {
-        for (int x = 0; x < WIDTH; x++) {
-            if (canvas_before[y][x] == 1)
-                printf("#");
-            else
-                printf(" ");
-        }
-
-        printf("\n");
-    }
-
-    char c = getchar();
-    printf("\e[1;1H\e[2J");
-}
-
 void CreateNextStep(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]) {
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
@@ -83,13 +68,31 @@ void CreateNextStep(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH])
     }
 }
 
+void DrawGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]) {
+    for (int y = 0; y < HEIGHT; y++) {
+        for (int x = 0; x < WIDTH; x++) {
+            if (canvas_before[y][x] == 1)
+                printf("#");
+            else
+                printf(" ");
+        }
+        printf("\n");
+    }
+
+    char c = getchar();
+    printf("\e[1;1H\e[2J");
+    CreateNextStep(canvas_before, canvas);
+}
+
+
+
 void LaunchGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]) {
     InitSettings();
-
     RandomCells(canvas_before);
 
     while (1) {
         DrawGame(canvas_before, canvas);
-        CreateNextStep(canvas_before, canvas);
+        
+        
     }
 }
