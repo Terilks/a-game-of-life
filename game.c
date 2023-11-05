@@ -9,13 +9,13 @@
 
 void InitSettings(int canvas_before[HEIGHT][WIDTH]);
 void LaunchGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]);
-void InitDisplaySpeed(int *speed, int *displaySpeed);
+void InitDisplaySpeed(const int *speed, int *displaySpeed);
 void RandomCells(int canvas[HEIGHT][WIDTH]);
 void ReadCanvas(int canvas_before[HEIGHT][WIDTH]);
 int IsWillLiveCeil(int canvas[HEIGHT][WIDTH], int y, int x);
 int GetCountNeighbor(int canvas[HEIGHT][WIDTH], int y, int x);
 void CreateNextStep(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]);
-void DrawGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH], int *displaySpeed);
+void DrawGame(int canvas_before[HEIGHT][WIDTH], int *displaySpeed);
 void DrawEndGame();
 void EndGame();
 
@@ -45,14 +45,13 @@ void InitSettings(int canvas_before[HEIGHT][WIDTH]) {
 }
 
 void LaunchGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]) {
-    int ch;
     int speed = 2;
     int displaySpeed = 9;
     while (1) {
-        DrawGame(canvas_before, canvas, &displaySpeed);
+        DrawGame(canvas_before, &displaySpeed);
         CreateNextStep(canvas_before, canvas);
         napms(70 * speed);
-        ch = getch();
+        int ch = getch();
         if (ch == 'q') break;
 
         if (ch == KEY_UP && speed > 1) {
@@ -70,7 +69,7 @@ void LaunchGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]) {
     endwin();
 }
 
-void InitDisplaySpeed(int *speed, int *displaySpeed) {
+void InitDisplaySpeed(const int *speed, int *displaySpeed) {
     *speed == 10 ? *displaySpeed = 1 : 0;
     *speed == 9 ? *displaySpeed = 2 : 0;
     *speed == 8 ? *displaySpeed = 3 : 0;
@@ -89,7 +88,7 @@ void RandomCells(int canvas[HEIGHT][WIDTH]) {
 }
 
 void ReadCanvas(int canvas_before[HEIGHT][WIDTH]) {
-        if (isatty(fileno(stdin))) {
+    if (isatty(fileno(stdin))) {
         RandomCells(canvas_before);
     } else {
         for (int i = 0; i < HEIGHT; i++) {
@@ -148,7 +147,7 @@ void CreateNextStep(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH])
     }
 }
 
-void DrawGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH], int *displaySpeed) {
+void DrawGame(int canvas_before[HEIGHT][WIDTH], int *displaySpeed) {
     clear();
     attroff(COLOR_PAIR(1));
     printw("Speed: %d\n", *displaySpeed);
