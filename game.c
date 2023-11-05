@@ -14,6 +14,9 @@ void InitSettings(int canvas_before[HEIGHT][WIDTH]) {
     curs_set(0);
     noecho();
     timeout(0);
+    start_color();
+    init_pair(1, COLOR_GREEN, COLOR_BLACK);
+    attron(COLOR_PAIR(1));
     keypad(stdscr, TRUE);
 
     for (int i = 0; i < HEIGHT; i++)
@@ -91,11 +94,13 @@ void CreateNextStep(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH])
 
 void DrawGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH], int *displaySpeed) {
     clear();
-    printw("Slowly Speed: %d\n", *displaySpeed);
+    attroff(COLOR_PAIR(1));
+    printw("Speed: %d\n", *displaySpeed);
+    attron(COLOR_PAIR(1));
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
             if (canvas_before[y][x] == 1)
-                printw("#");
+                printw("*");
             else
                 printw(" ");
         }
@@ -115,6 +120,7 @@ void DrawEndGame() {
 
 void EndGame() {
     clear();
+    init_pair(1, COLOR_RED, COLOR_BLACK);
     printw("\n\n\n\n\n\n");
     DrawEndGame();
     refresh();
@@ -122,30 +128,33 @@ void EndGame() {
 
 void LaunchGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]) {
     int ch;
-    int speed = 5;
-    int displaySpeed = 1;
+    int speed = 2;
+    int displaySpeed = 9;
     while (1) {
         DrawGame(canvas_before, canvas, &displaySpeed);
         CreateNextStep(canvas_before, canvas);
         napms(70 * speed);
         ch = getch();
-        if (ch == 'q')
-            break;
+        if (ch == 'q') break;
+
         if (ch == KEY_UP && speed > 1) {
-      speed--;
-    }
-    
-    if (ch == KEY_DOWN && speed < 5) {
-      speed++;
-    }
+            speed--;
+        }
 
-    speed == 5 ? displaySpeed = 1 : 0;
-    speed == 4 ? displaySpeed = 2 : 0;
-    speed == 3 ? displaySpeed = 3 : 0;
-    speed == 2 ? displaySpeed = 4 : 0;
-    speed == 1 ? displaySpeed = 5 : 0;
+        if (ch == KEY_DOWN && speed < 10) {
+            speed++;
+        }
 
-
+        speed == 10 ? displaySpeed = 1 : 0;
+        speed == 9 ? displaySpeed = 2 : 0;
+        speed == 8 ? displaySpeed = 3 : 0;
+        speed == 7 ? displaySpeed = 4 : 0;
+        speed == 6 ? displaySpeed = 5 : 0;
+        speed == 5 ? displaySpeed = 6 : 0;
+        speed == 4 ? displaySpeed = 7 : 0;
+        speed == 3 ? displaySpeed = 8 : 0;
+        speed == 2 ? displaySpeed = 9 : 0;
+        speed == 1 ? displaySpeed = 10 : 0;
     }
     EndGame();
     napms(1500);
