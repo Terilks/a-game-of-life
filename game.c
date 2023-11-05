@@ -7,9 +7,17 @@
 #define WIDTH 80
 #define HEIGHT 25
 
-void LaunchGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]);
 void InitSettings(int canvas_before[HEIGHT][WIDTH]);
+void LaunchGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]);
+void InitDisplaySpeed(int *speed, int *displaySpeed);
 void RandomCells(int canvas[HEIGHT][WIDTH]);
+void ReadCanvas(int canvas_before[HEIGHT][WIDTH]);
+int IsWillLiveCeil(int canvas[HEIGHT][WIDTH], int y, int x);
+int GetCountNeighbor(int canvas[HEIGHT][WIDTH], int y, int x);
+void CreateNextStep(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]);
+void DrawGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH], int *displaySpeed);
+void DrawEndGame();
+void EndGame();
 
 int main() {
     int canvas[HEIGHT][WIDTH];
@@ -19,27 +27,6 @@ int main() {
     LaunchGame(canvas, canvas_future);
 
     return 0;
-}
-
-void ReadCanvas(int canvas_before[HEIGHT][WIDTH]) {
-        if (isatty(fileno(stdin))) {
-        RandomCells(canvas_before);
-    } else {
-        for (int i = 0; i < HEIGHT; i++) {
-            for (int j = 0; j < WIDTH; j++) {
-                scanf("%d", &canvas_before[i][j]);
-            }
-        }
-    }
-
-    if (freopen("/dev/tty", "r", stdin) != NULL) {
-        TRUE;
-    }
-}
-
-void RandomCells(int canvas[HEIGHT][WIDTH]) {
-    for (int i = 0; i < HEIGHT; i++)
-        for (int j = 0; j < WIDTH; j++) canvas[i][j] = rand() % 2;
 }
 
 void InitSettings(int canvas_before[HEIGHT][WIDTH]) {
@@ -57,16 +44,64 @@ void InitSettings(int canvas_before[HEIGHT][WIDTH]) {
     ReadCanvas(canvas_before);
 }
 
-int GetCountNeighbor(int canvas[HEIGHT][WIDTH], int y, int x) {
-    int count_lives = 0;
+void LaunchGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]) {
+    int ch;
+    int speed = 2;
+    int displaySpeed = 9;
+    while (1) {
+        DrawGame(canvas_before, canvas, &displaySpeed);
+        CreateNextStep(canvas_before, canvas);
+        napms(70 * speed);
+        ch = getch();
+        if (ch == 'q') break;
 
-    for (int dy = -1; dy <= 1; dy++) {
-        for (int dx = -1; dx <= 1; dx++) {
-            if (dy == 0 && dx == 0) continue;
-            if (canvas[(y + dy + HEIGHT) % HEIGHT][(x + dx + WIDTH) % WIDTH] == 1) count_lives++;
+        if (ch == KEY_UP && speed > 1) {
+            speed--;
+        }
+
+        if (ch == KEY_DOWN && speed < 10) {
+            speed++;
+        }
+
+        InitDisplaySpeed(&speed, &displaySpeed);
+    }
+    EndGame();
+    napms(1500);
+    endwin();
+}
+
+void InitDisplaySpeed(int *speed, int *displaySpeed) {
+    *speed == 10 ? *displaySpeed = 1 : 0;
+    *speed == 9 ? *displaySpeed = 2 : 0;
+    *speed == 8 ? *displaySpeed = 3 : 0;
+    *speed == 7 ? *displaySpeed = 4 : 0;
+    *speed == 6 ? *displaySpeed = 5 : 0;
+    *speed == 5 ? *displaySpeed = 6 : 0;
+    *speed == 4 ? *displaySpeed = 7 : 0;
+    *speed == 3 ? *displaySpeed = 8 : 0;
+    *speed == 2 ? *displaySpeed = 9 : 0;
+    *speed == 1 ? *displaySpeed = 10 : 0;
+}
+
+void RandomCells(int canvas[HEIGHT][WIDTH]) {
+    for (int i = 0; i < HEIGHT; i++)
+        for (int j = 0; j < WIDTH; j++) canvas[i][j] = rand() % 2;
+}
+
+void ReadCanvas(int canvas_before[HEIGHT][WIDTH]) {
+        if (isatty(fileno(stdin))) {
+        RandomCells(canvas_before);
+    } else {
+        for (int i = 0; i < HEIGHT; i++) {
+            for (int j = 0; j < WIDTH; j++) {
+                scanf("%d", &canvas_before[i][j]);
+            }
         }
     }
-    return count_lives;
+
+    if (freopen("/dev/tty", "r", stdin) != NULL) {
+        TRUE;
+    }
 }
 
 int IsWillLiveCeil(int canvas[HEIGHT][WIDTH], int y, int x) {
@@ -86,6 +121,18 @@ int IsWillLiveCeil(int canvas[HEIGHT][WIDTH], int y, int x) {
     }
 
     return flag;
+}
+
+int GetCountNeighbor(int canvas[HEIGHT][WIDTH], int y, int x) {
+    int count_lives = 0;
+
+    for (int dy = -1; dy <= 1; dy++) {
+        for (int dx = -1; dx <= 1; dx++) {
+            if (dy == 0 && dx == 0) continue;
+            if (canvas[(y + dy + HEIGHT) % HEIGHT][(x + dx + WIDTH) % WIDTH] == 1) count_lives++;
+        }
+    }
+    return count_lives;
 }
 
 void CreateNextStep(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]) {
@@ -133,39 +180,4 @@ void EndGame() {
     printw("\n\n\n\n\n\n");
     DrawEndGame();
     refresh();
-}
-
-void LaunchGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]) {
-    int ch;
-    int speed = 2;
-    int displaySpeed = 9;
-    while (1) {
-        DrawGame(canvas_before, canvas, &displaySpeed);
-        CreateNextStep(canvas_before, canvas);
-        napms(70 * speed);
-        ch = getch();
-        if (ch == 'q') break;
-
-        if (ch == KEY_UP && speed > 1) {
-            speed--;
-        }
-
-        if (ch == KEY_DOWN && speed < 10) {
-            speed++;
-        }
-
-        speed == 10 ? displaySpeed = 1 : 0;
-        speed == 9 ? displaySpeed = 2 : 0;
-        speed == 8 ? displaySpeed = 3 : 0;
-        speed == 7 ? displaySpeed = 4 : 0;
-        speed == 6 ? displaySpeed = 5 : 0;
-        speed == 5 ? displaySpeed = 6 : 0;
-        speed == 4 ? displaySpeed = 7 : 0;
-        speed == 3 ? displaySpeed = 8 : 0;
-        speed == 2 ? displaySpeed = 9 : 0;
-        speed == 1 ? displaySpeed = 10 : 0;
-    }
-    EndGame();
-    napms(1500);
-    endwin();
 }
