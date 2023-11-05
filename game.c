@@ -1,32 +1,51 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>
+#include <ncurses.h>
 
 #define WIDTH 80
 #define HEIGHT 25
 
 void LaunchGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]);
+void InitSettings(int canvas_before[HEIGHT][WIDTH]) { srand(time(NULL)); 
+        initscr(); // Initialize ncurses
+    curs_set(0); // Hide the cursor
+    noecho(); // Don't display user input
+    timeout(0); // Non-blocking input
+    keypad(stdscr, TRUE);
 
-int main(int argc, char *argv[]) {
-    int canvas_before[HEIGHT][WIDTH];
-    int canvas[HEIGHT][WIDTH];
-    
-    LaunchGame(canvas_before, canvas);
-
-    return 0;
+    for (int i = 0; i < HEIGHT; i++)
+        for (int j = 0; j < WIDTH; j++) canvas_before[i][j] = 0;
 }
-
-void InitSettings() { srand(time(NULL)); }
 
 void RandomCells(int canvas[HEIGHT][WIDTH]) {
     for (int i = 0; i < HEIGHT; i++)
         for (int j = 0; j < WIDTH; j++) canvas[i][j] = rand() % 2;
+}
 
-    // for (int y = 0; y < HEIGHT; y++) {
-    //         for (int x = 0; x < WIDTH; x++) {
-    //             canvas[y][x] = 0;
-    //         }
-    //     }
+int main() {
+    int canvas_before[HEIGHT][WIDTH];
+    int canvas[HEIGHT][WIDTH];
+
+    InitSettings(canvas_before);
+
+    if (isatty(fileno(stdin))) {
+        RandomCells(canvas_before);
+    } else {
+        for (int i = 0; i < HEIGHT; i++) {
+            for (int j = 0; j < WIDTH; j++) {
+                if (scanf("%d", &canvas_before[i][j]) != 1) {
+                    printf("Ошибка при чтении данных из stdin\n");
+                    return 1;
+                }
+            }
+        }
+    }
+
+    LaunchGame(canvas_before, canvas);
+
+    return 0;
 }
 
 int IsHaveNeighbor(int canvas[HEIGHT][WIDTH], int y, int x) {
@@ -72,27 +91,30 @@ void DrawGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]) {
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
             if (canvas_before[y][x] == 1)
-                printf("#");
+                printw("#");
             else
-                printf(" ");
+                printw(" ");
         }
-        printf("\n");
+        printw("\n");
     }
+    refresh();
 
-    char c = getchar();
-    printf("\e[1;1H\e[2J");
+    usleep(100000);
+    move(0, 0);
     CreateNextStep(canvas_before, canvas);
 }
 
-
-
 void LaunchGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]) {
-    InitSettings();
-    RandomCells(canvas_before);
-
+    int ch;
     while (1) {
         DrawGame(canvas_before, canvas);
-        
-        
+        CreateNextStep(canvas_before, canvas);
+
+        ch = getch(); // Get user input
+        if (ch == 'q') // Press 'q' to exit
+            break;
+        clear();
     }
+
+    endwin(); // Clean up ncurses
 }
