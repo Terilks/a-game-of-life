@@ -10,10 +10,10 @@
 void LaunchGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]);
 void InitSettings(int canvas_before[HEIGHT][WIDTH]) {
     srand(time(NULL));
-    initscr();    // Initialize ncurses
-    curs_set(0);  // Hide the cursor
-    noecho();     // Don't display user input
-    timeout(0);   // Non-blocking input
+    initscr();
+    curs_set(0);
+    noecho();
+    timeout(0);
     keypad(stdscr, TRUE);
 
     for (int i = 0; i < HEIGHT; i++)
@@ -40,7 +40,7 @@ int main() {
             }
         }
     }
-    
+
     if (freopen("/dev/tty", "r", stdin) != NULL) {
         TRUE;
     }
@@ -89,8 +89,9 @@ void CreateNextStep(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH])
     }
 }
 
-void DrawGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]) {
+void DrawGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH], int *displaySpeed) {
     clear();
+    printw("Slowly Speed: %d\n", *displaySpeed);
     for (int y = 0; y < HEIGHT; y++) {
         for (int x = 0; x < WIDTH; x++) {
             if (canvas_before[y][x] == 1)
@@ -103,17 +104,50 @@ void DrawGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]) {
     refresh();
 }
 
+void DrawEndGame() {
+    printw(" _____  ___ ___  ________   _____ _   _______ \n");
+    printw("|  __ \\/ _ \\|  \\/  |  ___| |  ___| \\ | |  _  \\ \n");
+    printw("| |  \\/ /_\\ \\ .  . | |__   | |__ |  \\| | | | |\n");
+    printw("| | __|  _  | |\\/| |  __|  |  __|| . ` | | | |\n");
+    printw("| |_\\ \\ | | | |  | | |___  | |___| |\\  | |/ / \n");
+    printw(" \\____|_| |_|_|  |_|____/  \\____/\\_| \\_/___/  \n\n\n\n\n");
+}
+
+void EndGame() {
+    clear();
+    printw("\n\n\n\n\n\n");
+    DrawEndGame();
+    refresh();
+}
+
 void LaunchGame(int canvas_before[HEIGHT][WIDTH], int canvas[HEIGHT][WIDTH]) {
     int ch;
+    int speed = 5;
+    int displaySpeed = 1;
     while (1) {
-        DrawGame(canvas_before, canvas);
+        DrawGame(canvas_before, canvas, &displaySpeed);
         CreateNextStep(canvas_before, canvas);
-        napms(200);
-        ch = getch(); // Get user input
-        if (ch == 'q') // Press 'q' to exit
+        napms(70 * speed);
+        ch = getch();
+        if (ch == 'q')
             break;
-
+        if (ch == KEY_UP && speed > 1) {
+      speed--;
+    }
+    
+    if (ch == KEY_DOWN && speed < 5) {
+      speed++;
     }
 
-    endwin();  // Clean up ncurses
+    speed == 5 ? displaySpeed = 1 : 0;
+    speed == 4 ? displaySpeed = 2 : 0;
+    speed == 3 ? displaySpeed = 3 : 0;
+    speed == 2 ? displaySpeed = 4 : 0;
+    speed == 1 ? displaySpeed = 5 : 0;
+
+
+    }
+    EndGame();
+    napms(1500);
+    endwin();
 }
